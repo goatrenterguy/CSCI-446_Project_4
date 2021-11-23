@@ -59,14 +59,28 @@ class RaceTrack:
                     finishLine.append((x, y))
         return finishLine
 
-    def isWall(self, x, y):
+    def isWall(self, cell: tuple):
         """
         Method to check if a coordinate is a wall
-        :param x: x coordinate to check
-        :param y: y coordinate to check
+        :param cell: A tuple containing and x,y coordinate (x, y)
         :return: True if out of bounds of the track or a wall, False otherwise
         """
+        x = cell[0]
+        y = cell[1]
         if self.track[y][x] == '#' or x > len(self.track[0]) or x < 0 or y > len(self.track) or y < 0:
+            return True
+        else:
+            return False
+
+    def isFinish(self, cell: tuple):
+        """
+        Method to check if a coordinate is a finish line
+        :param cell: A tuple containing and x,y coordinate (x, y)
+        :return: True cell is finish line otherwise false
+        """
+        x = cell[0]
+        y = cell[1]
+        if self.track[y][x] == 'F':
             return True
         else:
             return False
