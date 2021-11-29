@@ -1,5 +1,8 @@
+import math
+
+
 class RaceTrack:
-    def __init__(self, path):
+    def __init__(self, path, debug=False):
         """
         Initializes a racetrack object
         :param path: Path to the racetrack txt file
@@ -8,6 +11,7 @@ class RaceTrack:
         self.track = self._parseFile(self._loadFile(path))
         self.startLine = self._findStartLine()
         self.finishLine = self._findFinishLine()
+        self.debug = debug
 
     @staticmethod
     def _parseFile(file):
@@ -84,3 +88,50 @@ class RaceTrack:
             return True
         else:
             return False
+
+    def _path(self, A: tuple, B: tuple):
+        """
+        Checks all cells of the unit grid crossed by the line segment between A and B.
+        @:param A: Tuple with x,y (x,y)
+        @:param B: Tuple with x,y (x,y)
+        :return all of the cells on the line from A to B
+        """
+        traversed = []
+        if A == B:
+            return traversed
+        (x1, y1) = A
+        (x2, y2) = B
+        deltaX = x2 - x1
+        deltaY = y2 - y1
+        if deltaX == 0:
+            if y1 > y2:
+                step = -1
+            else:
+                step = 1
+            for y in range(y1, y2 + 1, step):
+                traversed.append((x1, y))
+            if self.debug:
+                print(traversed)
+            return traversed
+        distance = math.sqrt(math.pow(deltaX, 2) + math.pow(deltaY, 2))
+        xInc = deltaX / distance
+        yInc = deltaY / distance
+        x = x1
+        y = y1
+        for step in range(round(distance)):
+            x += xInc
+            y += yInc
+            traversed.append((round(x), round(y)))
+        if self.debug:
+            print(traversed)
+        return traversed
+
+    def checkTraversed(self, A: tuple, B: tuple):
+        for t in self._path(A, B) + [B]:
+            if self.isFinish(t):
+                return 1, t
+            elif self.isWall(t):
+                if self.debug:
+                    print("Crash at " + str(t))
+                return -1, t
+        return 0, B

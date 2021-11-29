@@ -1,17 +1,13 @@
+from markovDecisionProcess import MDP
+from valueIteration import valueIteration
 from raceTrack import RaceTrack
 from agent import Agent
+from pprint import pprint
 
 if __name__ == '__main__':
     RaceTrack = RaceTrack("Tracks/L-track.txt")
     Agent = Agent(RaceTrack, debug=True)
-    Agent.changeVelocity(0, 0)
-    Agent.changeVelocity(5, 0)
-    Agent.changeVelocity(0, 0)
-    Agent.changeVelocity(0, 0)
-    Agent.changeVelocity(0, 0)
-    Agent.changeVelocity(-1, 0)
-    Agent.changeVelocity(-1, 0)
-    Agent.changeVelocity(-1, 0)
-    Agent.changeVelocity(0, -1)
-    Agent.changeVelocity(-1, -1)
-    Agent.changeVelocity(0, -1)
+    MDP = MDP()
+    MDP.makeMDPFromTrack(RaceTrack)
+    # pprint(MDP.transitions)
+    pprint(valueIteration(mdp=MDP))

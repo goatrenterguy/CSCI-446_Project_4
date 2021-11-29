@@ -53,55 +53,17 @@ class Agent:
         self.prevPosition = self.position
         # Update position based on current position and velocity
         self.position = (self.position[0] + self.velocity[0], self.position[1] + self.velocity[1])
-        for cell in self._path(self.prevPosition, self.position):
-            if self.track.isWall(cell):
-                if self.debug:
-                    print("Crash at " + str(cell))
-                if self.hardCrash:
-                    self._hardCrash()
-                else:
-                    self._mildCrash()
-                return False
-            elif self.track.isFinish(cell):
-                return True
+        statusOfMove, cell = self.track.checkTraversed(self.prevPosition, self.position)
+        if statusOfMove == -1:
+            if self.hardCrash:
+                self._hardCrash()
             else:
-                self.prevPosition = cell
-
-    def _path(self, A: tuple, B: tuple):
-        """
-        Return all cells of the unit grid crossed by the line segment between A and B.
-        @:param A: Tuple with x,y (x,y)
-        @:param B: Tuple with x,y (x,y)
-        """
-        traversed = []
-        if A == B:
-            return traversed
-        (x1, y1) = A
-        (x2, y2) = B
-        deltaX = x2 - x1
-        deltaY = y2 - y1
-        if deltaX == 0:
-            if y1 > y2:
-                step = -1
-            else:
-                step = 1
-            for y in range(y1, y2 + 1, step):
-                traversed.append((x1, y))
-            if self.debug:
-                print(traversed)
-            return traversed
-        distance = math.sqrt(math.pow(deltaX, 2) + math.pow(deltaY, 2))
-        xInc = deltaX / distance
-        yInc = deltaY / distance
-        x = x1
-        y = y1
-        for step in range(round(distance)):
-            x += xInc
-            y += yInc
-            traversed.append((round(x), round(y)))
-        if self.debug:
-            print(traversed)
-        return traversed
+                self._mildCrash()
+        elif statusOfMove == 1:
+            return True
+        else:
+            self.prevPosition = cell
+        return False
 
     def changeVelocity(self, x, y):
         """
