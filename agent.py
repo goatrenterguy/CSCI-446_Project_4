@@ -1,7 +1,8 @@
-import math
-from math import floor
+import copy
 
 from raceTrack import RaceTrack
+from markovDecisionProcess import MDP
+from valueIteration import valueIteration
 import random
 
 
@@ -22,19 +23,47 @@ class Agent:
         self.velocity = (0, 0)
 
     def printBoard(self):
-        board = self.track.track.copy()
+        """
+        Function for printing the track and where the agent currently is
+        """
+        board = copy.deepcopy(self.track.track)
         board[self.position[1]][self.position[0]] = "C"
         out = "Board:\n"
         for x in board:
             out += str(x) + "\n"
         print(out)
 
-    def _mildCrash(self):
+    def fastestPathValueIteration(self):
+        """
+        Function for finding the fastest path to the finish line using value iteration
+        :return: Array of the path taken
+        """
+        mdp = MDP()
+        mdp.makeMDPFromTrack(self.track, self.hardCrash)
+        utilities = valueIteration(mdp)
+        path = []
+        actionsTaken = []
+        while not self.track.isFinish(self.position):
+            actions = mdp.A((self.position, self.velocity))
+            utilitiesPerAction = {}
+            for action in actions:
+                utilitiesPerAction[action] = utilities[actions[action][0][1]]
+            actionToTake = max(utilitiesPerAction, key=utilitiesPerAction.get)
+            if not self.changeVelocity(actionToTake[0], actionToTake[1]):
+                actionsTaken.append(actionToTake)
+            else:
+                actionsTaken.append((0, 0))
+                if self.debug:
+                    print("Action " + str(actionToTake) + " failed")
+            path.append(self.position)
+        return path
+
+    def _mildCrash(self, cell):
         """
         Method for when the car crashes and the crash mode is mild. It resets the agents velocity to (0,0)
         and returns it to the closest spot on the course to where the crash occurred
         """
-        self.position = self.prevPosition
+        self.position = cell
         self.velocity = (0, 0)
 
     def _hardCrash(self):
@@ -52,17 +81,22 @@ class Agent:
         # Save previous position in case of a crash
         self.prevPosition = self.position
         # Update position based on current position and velocity
-        self.position = (self.position[0] + self.velocity[0], self.position[1] + self.velocity[1])
-        statusOfMove, cell = self.track.checkTraversed(self.prevPosition, self.position)
+        potentialPosition = (self.position[0] + self.velocity[0], self.position[1] + self.velocity[1])
+        statusOfMove, cell = self.track.checkTraversed(self.prevPosition, potentialPosition)
         if statusOfMove == -1:
+            self.position = cell
             if self.hardCrash:
                 self._hardCrash()
             else:
-                self._mildCrash()
+                self._mildCrash(cell)
+            if self.debug:
+                print("Crash at " + str(cell))
         elif statusOfMove == 1:
+            self.position = cell
             return True
         else:
-            self.prevPosition = cell
+            self.prevPosition = self.position
+            self.position = potentialPosition
         return False
 
     def changeVelocity(self, x, y):
@@ -72,14 +106,21 @@ class Agent:
         :param y: Value to adjust the velocity in the Y coordinate. y must be -1, 0, or 1
         """
         self.actions += 1
-        newXVelocity = self.velocity[0] + x
-        newYVelocity = self.velocity[1] + y
+        failed = False
+        r = random.random()
+        if r <= .8:
+            newXVelocity = self.velocity[0] + x
+            newYVelocity = self.velocity[1] + y
+        else:
+            newXVelocity = self.velocity[0]
+            newYVelocity = self.velocity[1]
+            failed = True
         if abs(newXVelocity) > 5:
             newXVelocity = 5
         if abs(newYVelocity) > 5:
             newYVelocity = 5
         self.velocity = (newXVelocity, newYVelocity)
-        if self._move():
-            print(self.actions)
-        elif self.debug:
+        self._move()
+        if self.debug:
             self.printBoard()
+        return failed

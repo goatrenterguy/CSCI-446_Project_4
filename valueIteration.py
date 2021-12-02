@@ -2,6 +2,12 @@ from markovDecisionProcess import MDP
 
 
 def valueIteration(mdp: MDP, epsilon=.001):
+    """
+    Function for conducting value iteration on an MDP, based on the pseudo code from the text book
+    :param mdp: A markov decision process
+    :param epsilon: Tunable value for when to stop iterating
+    :return: The potential utility for all states
+    """
     U1 = {s: 0 for s in mdp.states}
     R, T, gamma = mdp.R, mdp.T, mdp.discountFactor
     while True:
@@ -12,3 +18,4 @@ def valueIteration(mdp: MDP, epsilon=.001):
             delta = max(delta, abs(U1[s] - U[s]))
         if delta < epsilon * (1 - gamma) / gamma:
             return U
+

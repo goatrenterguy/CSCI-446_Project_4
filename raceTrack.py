@@ -127,11 +127,19 @@ class RaceTrack:
         return traversed
 
     def checkTraversed(self, A: tuple, B: tuple):
+        """
+        Funtion for checking all cells in the path from A to B
+        :param A: Starting coordinate
+        :param B: End coordinate
+        :return: Returns a 0 if it did not pass finish or crash on the path from A to B, and the cell it ended up in
+        """
+        last = A
         for t in self._path(A, B) + [B]:
             if self.isFinish(t):
                 return 1, t
             elif self.isWall(t):
                 if self.debug:
                     print("Crash at " + str(t))
-                return -1, t
+                return -1, last
+            last = t
         return 0, B
