@@ -3,6 +3,7 @@ import copy
 from raceTrack import RaceTrack
 from markovDecisionProcess import MDP
 from valueIteration import valueIteration
+from qLearning import qLearning
 import random
 
 
@@ -57,6 +58,9 @@ class Agent:
                     print("Action " + str(actionToTake) + " failed")
             path.append(self.position)
         return path
+
+    def fastestPathQLearning(self):
+        policy = qLearning(self.track, self.hardCrash, 1000)
 
     def _mildCrash(self, cell):
         """
