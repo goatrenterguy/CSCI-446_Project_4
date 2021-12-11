@@ -60,7 +60,9 @@ class Agent:
         return path
 
     def fastestPathQLearning(self):
-        policy = qLearning(self.track, self.hardCrash, 1000)
+        policy = qLearning(self.track, self.hardCrash, 1)
+        print("Success")
+        return policy
 
     def _mildCrash(self, cell):
         """

@@ -3,7 +3,7 @@ import random
 import numpy
 
 # CONSTANTS
-MAX_MOVES = 1000
+MAX_MOVES = 10
 MAX_VELOCITY = 5
 MIN_VELOCITY = -5
 LEARNING_RATE = 0.1
@@ -21,16 +21,13 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
     cols = range(len(track.track[0]))
     rows = range(len(track.track))
     startCells = []
+    qTable = [[[[[0 for _ in actions] for _ in speeds] for _ in speeds] for _ in cols] for _ in rows]  # Initialize all values in Q-table to zero
 
-    # Initialize all values in Q-table to zero
-    for col in cols:
-        for row in rows:
-            if track.track[col][row] == "." or track.track[col][row] == "S":
-                startCells.append([col][row])
-            for vel_x in speeds:
-                for vel_y in speeds:
-                    for action in actions:
-                        qTable [col][row][vel_x][vel_y][action] = 0
+    # gather all valid start states
+    for col in range(len(cols)):
+        for row in range(len(rows)):
+            if track.track[row][col] == "." or track.track[row][col] == "S":
+                startCells.append((col,row))
     
     while moves <= iterations:
         startCol, startRow = random.choice(startCells)
@@ -39,8 +36,8 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
         pos = (startCol, startRow)
         vel = (startX_vel, startY_vel)
         
-
-        while True:
+        done = False
+        while not done:
             moves += 1
             prevPos = pos
             prevVel = vel
@@ -48,25 +45,26 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
             inVel = False
             while not inVel:  # until you get a valid action
                 # Select action using the epsilon-greedy method
-                if random.random() < EPSILON:
+                if random.random() < EPSILON:  # on p(EPSILON) select a random action
                     actionIndex = random.choice(range(9))
                     action = actions[actionIndex]
-                else:
-                    actionIndex = numpy.argmax(qTable[pos[0]][pos[1]][vel[0]][vel[1]])
+                else:  # otherwise select the optimal action
+                    actionIndex = numpy.argmax(qTable[pos[1]][pos[0]][vel[0]][vel[1]])
                     action = actions[actionIndex]
                 newVel = (vel[0] + action[0], vel[1] + action[1])  # calculate new velocity
                 # check if the velocity is a legal speed
-                if newVel in speeds:
+                if newVel[0] in speeds and newVel[1] in speeds:
                     vel = newVel  # set new velocity
                     inVel = True
             
             # Move the car
             newPos = (pos[0]+vel[0], pos[1]+vel[1])  # calculate the new position
-            statusOfMove, cell = track.track.checkTraversed(pos, newPos)  # check if the move is possible
+            statusOfMove, cell = track.checkTraversed(pos, newPos)  # check if the move is possible
             if statusOfMove == -1:  # handle crashes
                 if hardCrash:  # if hard crashes are enabled
-                    pos = random.choice(track.track.startLine)  # move to the start
+                    pos = random.choice(track.startLine)  # move to the start
                     vel = (0, 0)  # set speed to zero
+                    done = True
                 else:
                     pos = cell  # move to the cell where the crash occured
                     vel = (0, 0)  # set speed to zero
@@ -74,13 +72,13 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
                 pos = cell  # move the car
             
             # CALCULATE Q VALUE ------------> ok I'm 50/50 this is the proper formula
-            reward = reward(track.track[pos[0], pos[1]])
-            bestNextActionIndex = numpy.argmax(qTable[pos[0]][pos[1]][vel[0]][vel[1]])
-            qTable[prevPos[0]][prevPos[1]][prevVel[0]][prevVel[1]][actionIndex] = qTable[prevPos[0]][prevPos[1]][prevVel[0]][prevVel[1]][actionIndex]+LEARNING_RATE*(reward+0.5*(qTable[pos[0]][pos[1]][vel[0]][vel[1]][bestNextActionIndex]-qTable[prevPos[0]][prevPos[1]][prevVel[0]][prevVel[1]][actionIndex]))
+            rewardValue = reward(track.track[pos[1]][pos[0]])
+            bestNextActionIndex = numpy.argmax(qTable[pos[1]][pos[0]][vel[0]][vel[1]])
+            qTable[prevPos[1]][prevPos[0]][prevVel[0]][prevVel[1]][actionIndex] = qTable[prevPos[1]][prevPos[0]][prevVel[0]][prevVel[1]][actionIndex]+LEARNING_RATE*(rewardValue+0.5*(qTable[pos[1]][pos[0]][vel[0]][vel[1]][bestNextActionIndex]-qTable[prevPos[1]][prevPos[0]][prevVel[0]][prevVel[1]][actionIndex]))
             
             # break if the agent reaches the goal or hits max moves
             if reward == 0 or moves > MAX_MOVES:
-                break
+                done = True
                     
     # After iterations we need to get the policy from the Q table
     policy = {} # initialize the policy
@@ -90,7 +88,7 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
             for vel_x in speeds:
                 for vel_y in speeds:
                     # Select the best action from the current state and add it to the policy
-                    policy[(col, row, vel_x, vel_y)] = actions[numpy.argmax(qTable[col][row][vel_x][vel_y])]
+                    policy[(col, row, vel_x, vel_y)] = actions[numpy.argmax(qTable[row][col][vel_x][vel_y])]
     return policy # Return the optimal policy
             
 
