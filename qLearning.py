@@ -28,6 +28,7 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
         for col in range(len(cols)):
             if track.track[row][col] == "." or track.track[row][col] == "S":
                 startCells.append((col,row))
+    counter = 0
     while moves <= iterations:
         if moves == iterations/4:
             print("-------------------25%-----------------")
@@ -42,10 +43,12 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
         vel = (startX_vel, startY_vel)
         
         done = False
+
         while not done:
             moves += 1
             prevPos = pos
             prevVel = vel
+
             # First change the velocity
             inVel = False
             while not inVel:  # until you get a valid action
@@ -74,16 +77,18 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
                 else:
                     pos = cell  # move to the cell where the crash occured
                     vel = (0, 0)  # set speed to zero
+                rewardValue = reward("#")
+                done = True
             else:  # the car did not crash
                 pos = cell  # move the car
+                rewardValue = reward(track.track[pos[1]][pos[0]])
             
-            # CALCULATE Q VALUE ------------> ok I'm 50/50 this is the proper formula
-            rewardValue = reward(track.track[pos[1]][pos[0]])
             bestNextActionIndex = indexOfOptimal(qTable[pos[0]][pos[1]][vel[0]+5][vel[1]+5], vel[0]+5, vel[1]+5)
             qTable[prevPos[0]][prevPos[1]][prevVel[0]+5][prevVel[1]+5][actionIndex] = (1 - LEARNING_RATE) * qTable[prevPos[0]][prevPos[1]][prevVel[0]+5][prevVel[1]+5][actionIndex]+LEARNING_RATE*(rewardValue+0.5*(qTable[pos[0]][pos[1]][vel[0]+5][vel[1]+5][bestNextActionIndex]-qTable[prevPos[0]][prevPos[1]][prevVel[0]+5][prevVel[1]+5][actionIndex]))
             
             # break if the agent reaches the goal or hits max moves
-            if reward == 0 or moves > MAX_MOVES:
+            if rewardValue == 0 or moves > MAX_MOVES:
+                counter += 1
                 done = True
                     
     # After iterations we need to get the policy from the Q table
@@ -108,13 +113,13 @@ def reward(state):
     elif state == '.':
         return -1
     elif state == 'S':
-        return -1
-    else:
         return -100
+    else:
+        return -1000
 
 def indexOfOptimal(actions, vel_x, vel_y):
     index = 0
-    maxVal = -100
+    maxVal = 100
     for i in range(len(actions)):
         if not (vel_x == 0 and vel_y == 0 and i == 5):
             if actions[i] >= maxVal:
