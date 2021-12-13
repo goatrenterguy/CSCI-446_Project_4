@@ -5,7 +5,7 @@ from agent import Agent
 from pprint import pprint
 
 if __name__ == '__main__':
-    RaceTrack = RaceTrack("Tracks/L-track.txt", debug=True)
-    Agent = Agent(RaceTrack, debug=True, hardCrash=True)
+    RaceTrack = RaceTrack("Tracks/L-track.txt", debug=False)
+    Agent = Agent(RaceTrack, debug=False, hardCrash=True)
     #print(Agent.fastestPathValueIteration())
     print(Agent.fastestPathQLearning())

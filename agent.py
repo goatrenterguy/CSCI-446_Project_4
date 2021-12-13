@@ -60,9 +60,19 @@ class Agent:
         return path
 
     def fastestPathQLearning(self):
-        policy = qLearning(self.track, self.hardCrash, 1)
-        print("Success")
-        return policy
+        policy = qLearning(self.track, self.hardCrash, 100000)
+        path = []
+        actionsTaken = []
+        while not self.track.isFinish(self.position) and len(actionsTaken) < 100:
+            bestAction = policy[self.position[0], self.position[1], self.velocity[0], self.velocity[1]]
+            if not self.changeVelocity(bestAction[0], bestAction[1]):
+                actionsTaken.append(bestAction)
+            else:
+                actionsTaken.append((0, 0))
+                if self.debug:
+                    print("Action " + str(bestAction) + " failed")
+            path.append(self.position)
+        return path
 
     def _mildCrash(self, cell):
         """
