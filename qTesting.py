@@ -70,6 +70,7 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
             moves += 1
             prevPos = pos
             prevVel = vel
+            statusOfMove, cell = track.checkTraversed(pos, (pos[0]+vel[0], pos[1]+vel[1]))
 
             # First change the velocity
             inVel = False
@@ -83,7 +84,7 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
                         qTable[(prevPos, prevVel, movesList[moves])] = action
                         done = True
                 newVel = (vel[0] + action[0], vel[1] + action[1])  # calculate new velocity
-
+                #if newVel[0] not in speeds or newVel[1] not in speeds:
                 if pos[0]+newVel[0] in cols and pos[1]+newVel[1] in rows: # check if the velocity is a legal speed
                     vel = newVel  # set new velocity
                     inVel = True
