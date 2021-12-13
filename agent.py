@@ -60,7 +60,7 @@ class Agent:
         return path
 
     def fastestPathQLearning(self):
-        policy = qLearning(self.track, self.hardCrash, 100000)
+        policy = qLearning(self.track, self.hardCrash, 1000)
         #self.position = (10, 8)
         path = []
         actionsTaken = []

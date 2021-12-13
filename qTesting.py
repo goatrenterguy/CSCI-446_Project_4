@@ -100,10 +100,10 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
             movesList.append(pos)
             bestNext = optimal(pos, vel)
             qTable[(prevPos, prevVel, action)] = (1-learning_rate)*qTable[(prevPos, prevVel, action)] + \
-                learning_rate*(rewardValue+0.5*(qTable[(pos, vel, bestNext)] - qTable[(prevPos, prevVel, action)]))
+                learning_rate*(rewardValue+0.7*(qTable[(pos, vel, bestNext)] - qTable[(prevPos, prevVel, action)]))
 
             # break if the agent reaches the goal or hits max moves
-            if rewardValue == 0 or rewardValue == -100 or moves > 100:
+            if rewardValue == 1:#or rewardValue == -100:
                 counter += 1
                 done = True
     policy = {}
