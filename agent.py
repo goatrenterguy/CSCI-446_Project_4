@@ -60,11 +60,11 @@ class Agent:
         return path
 
     def fastestPathQLearning(self):
-        policy = qLearning(self.track, self.hardCrash, 10000)
+        policy = qLearning(self.track, self.hardCrash, 100000)
         #self.position = (10, 8)
         path = []
         actionsTaken = []
-        while not self.track.isFinish(self.position) and len(actionsTaken) < 20:
+        while not self.track.isFinish(self.position):
             bestAction = policy[(self.position, self.velocity)]
             print(bestAction)
             if not self.changeVelocity(bestAction[0], bestAction[1]):
