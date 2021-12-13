@@ -66,11 +66,12 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
 
         moves = 0
 
+
         while not done:
+            statusOfMove, cell = track.checkTraversed(pos, (pos[0]+vel[0], pos[1]+vel[1]))
             moves += 1
             prevPos = pos
             prevVel = vel
-            statusOfMove, cell = track.checkTraversed(pos, (pos[0]+vel[0], pos[1]+vel[1]))
 
             # First change the velocity
             inVel = False
@@ -80,14 +81,11 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
                     action = random.choice(actions)
                 else:  # otherwise select the optimal action
                     action = optimal(pos, vel)
-                    if type(action) == int:
-                        qTable[(prevPos, prevVel, movesList[moves])] = action
-                        done = True
                 newVel = (vel[0] + action[0], vel[1] + action[1])  # calculate new velocity
-                #if newVel[0] not in speeds or newVel[1] not in speeds:
-                if pos[0]+newVel[0] in cols and pos[1]+newVel[1] in rows: # check if the velocity is a legal speed
-                    vel = newVel  # set new velocity
-                    inVel = True
+                if newVel[0] in speeds and newVel[1] in speeds:
+                    if pos[0]+newVel[0] in cols and pos[1]+newVel[1] in rows: # check if the velocity is a legal speed
+                        vel = newVel  # set new velocity
+                        inVel = True
 
             newPos = (pos[0]+vel[0], pos[1]+vel[1])  # calculate the new position
             
@@ -121,7 +119,7 @@ def qLearning(track: RaceTrack, hardCrash: bool, iterations):
                     learning_rate*(rewardValue+qTable[(pos, vel, bestNext)] - qTable[(prevPos, prevVel, action)])
 
             # break if the agent reaches the goal or hits max moves
-            if rewardValue == 1 or moves > MAX_MOVES or rewardValue == -1000:
+            if rewardValue == 1 or moves > MAX_MOVES:
                 counter += 1
                 done = True
     print(optimal((1, 7), (0, 0)))
@@ -144,15 +142,12 @@ def optimal(pos, vel):
         if qTable[(pos, vel, action)] > maxVal and not (vel == (0, 0) and action == (0, 0)):
             maxVal = qTable[(pos, vel, action)]
             bestAct = action
-    if bestAct == ():
-        print("NOT THIS")
-        return maxVal
-    else:
-        return bestAct
+    return bestAct
 
 def makeTable(cols, rows, track):
     for col in cols:
         for row in rows:
+            startCells.append((col, row))
             for x_vel in speeds:
                 for y_vel in speeds:
                     for action in actions:
