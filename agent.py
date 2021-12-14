@@ -3,7 +3,7 @@ import copy
 from raceTrack import RaceTrack
 from markovDecisionProcess import MDP
 from valueIteration import valueIteration
-from qTesting import qLearning
+from qLearning import qLearning
 import random
 
 
@@ -61,12 +61,10 @@ class Agent:
 
     def fastestPathQLearning(self):
         policy = qLearning(self.track, self.hardCrash, 1000)
-        #self.position = (10, 8)
         path = []
         actionsTaken = []
         while not self.track.isFinish(self.position):
             bestAction = policy[(self.position, self.velocity)]
-            print(bestAction)
             if not self.changeVelocity(bestAction[0], bestAction[1]):
                 actionsTaken.append(bestAction)
             else:
@@ -74,6 +72,21 @@ class Agent:
                 if self.debug:
                     print("Action " + str(bestAction) + " failed")
             path.append(self.position)
+        board = []
+        for row in range(len(self.track.track)):
+            r = []
+            for col in range(len(self.track.track[0])):
+                
+                if (col, row) in path:
+                    elem = "C"
+                else:
+                    elem = self.track.track[row][col]
+                r.append(elem)
+            board.append(r)
+        out = "Board:\n"
+        for x in board:
+            out += str(x) + "\n"
+        print(out)
         return path
 
     def _mildCrash(self, cell):
