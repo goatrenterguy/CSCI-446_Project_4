@@ -76,7 +76,6 @@ class Agent:
         for row in range(len(self.track.track)):
             r = []
             for col in range(len(self.track.track[0])):
-                
                 if (col, row) in path:
                     elem = "C"
                 else:
@@ -87,6 +86,7 @@ class Agent:
         for x in board:
             out += str(x) + "\n"
         print(out)
+
         return path
 
     def _mildCrash(self, cell):

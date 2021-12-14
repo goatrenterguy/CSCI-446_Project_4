@@ -6,8 +6,6 @@ from pprint import pprint
 from qLearning import qLearning
 
 if __name__ == '__main__':
-    RaceTrack = RaceTrack("Tracks/R-track.txt", debug=False)
-    Agent = Agent(RaceTrack, debug=False, hardCrash=True)
-    #print(Agent.fastestPathValueIteration())
-    print(Agent.fastestPathQLearning())
-    #qLearning(RaceTrack, hardCrash=True, iterations=10000)
+    track = RaceTrack("Tracks/R-track.txt", debug=False)
+    a = Agent(track, debug=False, hardCrash=False)
+    print(a.fastestPathQLearning())
